@@ -184,19 +184,41 @@ export const Charts: React.FC<ChartsProps> = ({ data, stats }) => {
                 paddingAngle={5}
                 dataKey="value"
                 stroke="none"
-                label={({ percent }) => `${(percent * 100).toFixed(0)}%`}
+                label={({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }) => {
+                  const RADIAN = Math.PI / 180;
+                  const radius = outerRadius * 1.2;
+                  const x = cx + radius * Math.cos(-midAngle * RADIAN);
+                  const y = cy + radius * Math.sin(-midAngle * RADIAN);
+                  return (
+                    <text 
+                      x={x} 
+                      y={y} 
+                      fill={statusData[index].color} 
+                      textAnchor={x > cx ? 'start' : 'end'} 
+                      dominantBaseline="central"
+                      className="text-xs font-black"
+                    >
+                      {`${(percent * 100).toFixed(0)}%`}
+                    </text>
+                  );
+                }}
               >
                 {statusData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
               <Tooltip 
-                contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#f8fafc' }}
+                contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '12px', color: '#f8fafc', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }}
                 itemStyle={{ color: '#f8fafc' }}
-                formatter={(value: number) => {
+                formatter={(value: number, name: string, props: any) => {
                   const total = data.length;
                   const percentage = ((value / total) * 100).toFixed(1);
-                  return [`${value} (${percentage}%)`, 'Cantidad'];
+                  return [
+                    <span className="font-medium">
+                      {value} <span className="text-blue-400 font-bold">({percentage}%)</span>
+                    </span>, 
+                    name
+                  ];
                 }}
               />
               <Legend verticalAlign="bottom" height={36}/>
