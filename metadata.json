@@ -1,0 +1,5 @@
+{
+  "name": "LogiTrack Analytics",
+  "description": "Herramienta de análisis logístico para evaluar el desempeño de entregas (On-Time Delivery) mediante la importación de datos desde Excel.",
+  "requestFramePermissions": []
+}
