@@ -253,9 +253,9 @@ export default function App() {
   };
 
   const getOtdColor = (rate: number) => {
-    if (rate < 92) return 'red';
-    if (rate < 96) return 'amber';
-    return 'green';
+    if (rate > 95) return 'green';
+    if (rate >= 92) return 'amber';
+    return 'red';
   };
 
   const kpiGrid = (

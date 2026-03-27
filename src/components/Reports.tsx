@@ -112,19 +112,30 @@ export const Reports: React.FC<ReportsProps> = ({ data }) => {
             <tbody className="divide-y divide-slate-800">
               {Object.entries(monthlyStats).sort().reverse().map(([month, s]) => {
                 const periodStats = s as { total: number, onTime: number };
+                const otdRate = (periodStats.onTime / periodStats.total) * 100;
+                
+                let statusLabel = 'Alerta';
+                let statusClass = 'bg-rose-900/30 text-rose-400';
+                
+                if (otdRate > 95) {
+                  statusLabel = 'Óptimo';
+                  statusClass = 'bg-emerald-900/30 text-emerald-400';
+                } else if (otdRate >= 92) {
+                  statusLabel = 'Moderado';
+                  statusClass = 'bg-amber-900/30 text-amber-400';
+                }
+
                 return (
                   <tr key={month} className="hover:bg-slate-800/50 transition-colors">
                     <td className="px-6 py-4 text-sm font-bold text-slate-200">{month}</td>
                     <td className="px-6 py-4 text-sm text-slate-400">{periodStats.total}</td>
                     <td className="px-6 py-4 text-sm text-slate-400">{periodStats.onTime}</td>
                     <td className="px-6 py-4 text-sm font-bold text-slate-200">
-                      {((periodStats.onTime / periodStats.total) * 100).toFixed(1)}%
+                      {otdRate.toFixed(1)}%
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`inline-flex px-2 py-1 rounded-lg text-[10px] font-black uppercase ${
-                        (periodStats.onTime / periodStats.total) > 0.8 ? 'bg-emerald-900/30 text-emerald-400' : 'bg-rose-900/30 text-rose-400'
-                      }`}>
-                        {(periodStats.onTime / periodStats.total) > 0.8 ? 'Óptimo' : 'Crítico'}
+                      <span className={`inline-flex px-2 py-1 rounded-lg text-[10px] font-black uppercase ${statusClass}`}>
+                        {statusLabel}
                       </span>
                     </td>
                   </tr>
