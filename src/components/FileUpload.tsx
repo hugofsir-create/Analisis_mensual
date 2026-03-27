@@ -1,6 +1,7 @@
 import React, { useCallback } from 'react';
 import * as XLSX from 'xlsx';
 import { Upload, FileSpreadsheet, AlertCircle } from 'lucide-react';
+import { toast } from 'sonner';
 import { DeliveryData, processRawData } from '../types';
 
 interface FileUploadProps {
@@ -14,23 +15,45 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onDataLoaded }) => {
 
     const reader = new FileReader();
     reader.onload = (evt) => {
-      const bstr = evt.target?.result;
-      const wb = XLSX.read(bstr, { type: 'binary' });
-      const wsname = wb.SheetNames[0];
-      const ws = wb.Sheets[wsname];
-      // Use header: "A" to get keys like A, B, C... which matches user's column references
-      // range: 1 skips the first row (row 1) as requested by the user
-      const data = XLSX.utils.sheet_to_json(ws, { header: "A", raw: true, range: 1 });
-      
-      // Filter out empty rows to get an accurate count of data rows
-      const processedData = data.filter((row: any) => {
-        const hasContent = Object.values(row).some(v => v !== null && v !== undefined && v !== '');
-        return hasContent;
-      });
+      try {
+        const bstr = evt.target?.result;
+        const wb = XLSX.read(bstr, { type: 'binary' });
+        const wsname = wb.SheetNames[0];
+        const ws = wb.Sheets[wsname];
+        
+        // Use header: "A" to get keys like A, B, C... which matches user's column references
+        // range: 1 skips the first row (row 1) as requested by the user
+        const data = XLSX.utils.sheet_to_json(ws, { header: "A", raw: true, range: 1 });
+        
+        if (!data || data.length === 0) {
+          toast.error('El archivo parece estar vacío o no tiene el formato correcto.');
+          return;
+        }
 
-      const processed = processRawData(processedData);
-      onDataLoaded(processed);
+        // Filter out empty rows to get an accurate count of data rows
+        const processedData = data.filter((row: any) => {
+          const hasContent = Object.values(row).some(v => v !== null && v !== undefined && v !== '');
+          return hasContent;
+        });
+
+        if (processedData.length === 0) {
+          toast.error('No se encontraron datos válidos en el archivo.');
+          return;
+        }
+
+        const processed = processRawData(processedData);
+        onDataLoaded(processed);
+        toast.success(`Se cargaron ${processed.length} registros exitosamente.`);
+      } catch (error) {
+        console.error('Error processing file:', error);
+        toast.error('Error al procesar el archivo Excel. Asegúrate de que el formato sea correcto.');
+      }
     };
+    
+    reader.onerror = () => {
+      toast.error('Error al leer el archivo.');
+    };
+
     reader.readAsBinaryString(file);
   }, [onDataLoaded]);
 

@@ -109,12 +109,12 @@ export const processRawData = (raw: any[]): DeliveryData[] => {
       (typeof rawTurno === 'string' && !['no', 'n', 'false', '0', ''].includes(rawTurno.trim().toLowerCase()))
     );
     
-    const cliente = row['B'] || row['Cliente'] || row['cliente'] || row['Customer'] || row['Destinatario'] || 'N/A';
+    const cliente = String(row['B'] || row['Cliente'] || row['cliente'] || row['Customer'] || row['Destinatario'] || 'N/A');
     // Column J: Zona
-    const zona = row['J'] || row['Zona'] || row['Region'] || row['Zone'] || row['Localidad'] || 'Sin Zona';
+    const zona = String(row['J'] || row['Zona'] || row['Region'] || row['Zone'] || row['Localidad'] || 'Sin Zona');
     
     // If A is status, we might need another column for Comprobante, but we'll keep the fallback chain
-    const comprobante = row['C'] || row['A'] || row['Comprobante'] || row['comprobante'] || row['Invoice'] || row['Nro'] || row['Documento'] || `INV-${index}`;
+    const comprobante = String(row['C'] || row['A'] || row['Comprobante'] || row['comprobante'] || row['Invoice'] || row['Nro'] || row['Documento'] || `INV-${index}`);
     
     const limitDate = safeParseDate(rawFechaLimite);
     const actualDate = safeParseDate(rawFechaEntrega);

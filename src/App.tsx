@@ -20,6 +20,8 @@ import { Charts } from './components/Charts';
 import { SplashScreen } from './components/SplashScreen';
 import { SuggestionsModal } from './components/SuggestionsModal';
 import { Reports } from './components/Reports';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { Toaster, toast } from 'sonner';
 import { DeliveryData, calculateStats } from './types';
 import { cn } from './lib/utils';
 import jsPDF from 'jspdf';
@@ -56,8 +58,8 @@ export default function App() {
 
   const filteredData = useMemo(() => {
     return data.filter(item => {
-      const matchesSearch = item.comprobante.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesCustomer = item.cliente?.toLowerCase().includes(searchCustomer.toLowerCase());
+      const matchesSearch = (item.comprobante || '').toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesCustomer = (item.cliente || '').toLowerCase().includes(searchCustomer.toLowerCase());
       const matchesStatus = filterStatus === 'all' || item.estado === filterStatus;
       const matchesZone = filterZone === 'all' || item.zona === filterZone;
       return matchesSearch && matchesCustomer && matchesStatus && matchesZone;
@@ -107,40 +109,45 @@ export default function App() {
 
   if (data.length === 0) {
     return (
-      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 text-slate-100">
-        <div className="max-w-4xl w-full space-y-8">
-          <div className="text-center space-y-4">
-            <div className="inline-flex p-4 bg-blue-600 rounded-3xl shadow-xl shadow-blue-900/20 mb-4">
-              <LayoutDashboard className="w-10 h-10 text-white" />
-            </div>
-            <h1 className="text-4xl font-black text-white tracking-tight">LogiTrack Analytics</h1>
-            <p className="text-slate-400 text-lg max-w-xl mx-auto">
-              Analiza el desempeño de tus entregas logísticas. Importa tu reporte de Excel para visualizar KPIs de cumplimiento y detectar cuellos de botella.
-            </p>
-          </div>
-          
-          <FileUpload onDataLoaded={setData} />
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
-            {[
-              { icon: TrendingUp, title: "On-Time Delivery", desc: "Mide el porcentaje de entregas realizadas antes del límite." },
-              { icon: Clock, title: "Análisis de Atrasos", desc: "Identifica cuántos días promedio se retrasan tus pedidos." },
-              { icon: Calendar, title: "Impacto de Turnos", desc: "Evalúa si las entregas con turno son más eficientes." }
-            ].map((feature, i) => (
-              <div key={i} className="bg-slate-900 p-6 rounded-2xl border border-slate-800">
-                <feature.icon className="w-6 h-6 text-blue-400 mb-3" />
-                <h3 className="font-bold text-slate-100 mb-1">{feature.title}</h3>
-                <p className="text-sm text-slate-400 leading-relaxed">{feature.desc}</p>
+      <ErrorBoundary>
+        <Toaster position="top-right" theme="dark" richColors />
+        <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 text-slate-100">
+          <div className="max-w-4xl w-full space-y-8">
+            <div className="text-center space-y-4">
+              <div className="inline-flex p-4 bg-blue-600 rounded-3xl shadow-xl shadow-blue-900/20 mb-4">
+                <LayoutDashboard className="w-10 h-10 text-white" />
               </div>
-            ))}
+              <h1 className="text-4xl font-black text-white tracking-tight">LogiTrack Analytics</h1>
+              <p className="text-slate-400 text-lg max-w-xl mx-auto">
+                Analiza el desempeño de tus entregas logísticas. Importa tu reporte de Excel para visualizar KPIs de cumplimiento y detectar cuellos de botella.
+              </p>
+            </div>
+            
+            <FileUpload onDataLoaded={setData} />
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+              {[
+                { icon: TrendingUp, title: "On-Time Delivery", desc: "Mide el porcentaje de entregas realizadas antes del límite." },
+                { icon: Clock, title: "Análisis de Atrasos", desc: "Identifica cuántos días promedio se retrasan tus pedidos." },
+                { icon: Calendar, title: "Impacto de Turnos", desc: "Evalúa si las entregas con turno son más eficientes." }
+              ].map((feature, i) => (
+                <div key={i} className="bg-slate-900 p-6 rounded-2xl border border-slate-800">
+                  <feature.icon className="w-6 h-6 text-blue-400 mb-3" />
+                  <h3 className="font-bold text-slate-100 mb-1">{feature.title}</h3>
+                  <p className="text-sm text-slate-400 leading-relaxed">{feature.desc}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      </ErrorBoundary>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 flex text-slate-100">
+    <ErrorBoundary>
+      <Toaster position="top-right" theme="dark" richColors />
+      <div className="min-h-screen bg-slate-950 flex text-slate-100">
       {/* Sidebar - Desktop */}
       <aside className="hidden lg:flex w-64 bg-slate-900 border-r border-slate-800 flex-col p-6 sticky top-0 h-screen">
         <div className="flex items-center space-x-3 mb-10">
@@ -421,5 +428,6 @@ export default function App() {
         />
       </main>
     </div>
+    </ErrorBoundary>
   );
 }
